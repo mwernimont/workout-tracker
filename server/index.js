@@ -1,10 +1,12 @@
 const express = require("express");
 const app = express();
 const workoutsRouter = require("./routes/workouts");
+const exercisesRouter = require("./routes/exercises");
 
 
 app.use(express.json());
 app.use("/workouts", workoutsRouter);
+app.use("/exercises", exercisesRouter);
 
 app.get("/", (req, res) => {
     res.json({ message: "API is running" });
