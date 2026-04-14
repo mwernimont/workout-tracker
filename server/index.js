@@ -1,22 +1,26 @@
-const express = require("express");
-const app = express();
-const workoutsRouter = require("./routes/workouts");
-const exercisesRouter = require("./routes/exercises");
+const express = require('express')
+const app = express()
 
+const programsRouter = require('./routes/programs')
+const workoutsRouter = require('./routes/workouts')
+const exercisesRouter = require('./routes/exercises')
+const setsRouter = require('./routes/sets')
+const goalsRouter = require('./routes/goals')
+const bodyweightRouter = require('./routes/bodyweight')
 
-app.use(express.json());
-app.use("/workouts", workoutsRouter);
-app.use("/exercises", exercisesRouter);
+app.use(express.json())
 
-app.get("/", (req, res) => {
-    res.json({ message: "API is running" });
-});
+app.use('/programs', programsRouter)
+app.use('/workouts', workoutsRouter)
+app.use('/exercises', exercisesRouter)
+app.use('/sets', setsRouter)
+app.use('/goals', goalsRouter)
+app.use('/bodyweight', bodyweightRouter)
 
 app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ success: false, message: 'Server Error' });
-});
+  console.error(err.stack)
+  res.status(500).json({ error: err.message })
+})
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
-});
+const PORT = process.env.PORT || 3000
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
