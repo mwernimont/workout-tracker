@@ -7,25 +7,101 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum BodyPart {
+  CHEST
+  BACK
+  LEGS
+  SHOULDERS
+  BICEPS
+  TRICEPS
+  FOREARMS
+  CORE
+}
+
+enum SetType {
+  REPS
+  TIME
+}
+
+
+model Program {
+  id Int  @id @default(autoincrement())
+  title String
+  default Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  workouts  ProgramWorkout[]
+}
+
 model Workout {
-  id        Int        @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   title     String
-  date      DateTime   @default(now())
-  exercises Exercise[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  date      DateTime?
+  programs  ProgramWorkout[]
+  exercises WorkoutExercise[]
 }
 
 model Exercise {
   id         Int     @id @default(autoincrement())
   name       String
-  sets       Set[]
-  workout    Workout @relation(fields: [workoutId], references: [id])
-  workoutId  Int
+  bodyParts  ExerciseBodyPart[]
+  workouts WorkoutExercise[]
 }
 
-model Set {
+model Goal {
+  id        Int     @id @default(autoincrement())
+  title String
+  completed Boolean @default(false)
+  createdAt DateTime @default(now())
+  deadline  DateTime?
+}
+
+model BodyWeight {
+  id        Int      @id @default(autoincrement())
+  weight    Float
+  createdAt DateTime @default(now())
+}
+
+model ProgramWorkout {
+  id        Int     @id @default(autoincrement())
+  programId Int
+  workoutId Int
+  order     Int  
+  program   Program @relation(fields: [programId], references: [id])
+  workout   Workout @relation(fields: [workoutId], references: [id])
+}
+
+model WorkoutExercise {
+  id           Int      @id @default(autoincrement())
+  workoutId    Int
+  exerciseId   Int
+  order        Int
+  setCount     Int
+  setType      SetType
+  repTarget    Int?     // null if TIME
+  timeTarget   Int?     // seconds, null if REPS
+  circuitGroup Int?
+  workout      Workout  @relation(fields: [workoutId], references: [id])
+  exercise     Exercise @relation(fields: [exerciseId], references: [id])
+  logs         SetLog[]
+}
+
+model SetLog {
+  id                Int             @id @default(autoincrement())
+  workoutExerciseId Int
+  setNumber         Int             // which set this was (1, 2, 3...)
+  actualReps        Int?
+  actualTime        Int?            // seconds
+  weight            Float?
+  createdAt DateTime @default(now())
+  workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id])
+}
+
+model ExerciseBodyPart {
   id         Int      @id @default(autoincrement())
-  reps       Int
-  weight     Float
-  exercise   Exercise @relation(fields: [exerciseId], references: [id])
   exerciseId Int
+  bodyPart   BodyPart
+  exercise   Exercise @relation(fields: [exerciseId], references: [id])
 }
