@@ -14,6 +14,28 @@ router.post('/', async (req, res) => {
     res.status(201).json(program)
 })
 
+//Add Workout to Program
+router.post('/:id/workouts', async (req, res) => {
+    const programId = parseInt(req.params.id);
+    const workoutId = parseInt(req.body.workoutId);
+    const order = parseInt(req.body.order);
+    const program = await prisma.program.findUnique({where: {id: programId}});
+    if(!program){
+        return res.status(404).json({ success: false, message: 'Program does not exist' });
+    }
+    const workout = await prisma.workout.findUnique({where: {id: workoutId}});
+    if(!workout){
+        return res.status(404).json({ success: false, message: 'Wokrout does not exist' });
+    }
+    if(!order){
+         return res.status(400).json({ success: false, message: 'Order must be included' });
+    }
+    const programWorkout = await prisma.programWorkout.create({
+        data: { programId, workoutId, order }
+    })
+    res.status(201).json(programWorkout)
+})
+
 //Get ALL Programs
 router.get("/", async (req, res) => {
     const programs = await prisma.program.findMany();
