@@ -62,6 +62,26 @@ router.post('/:id/exercises', validId, async (req, res) => {
     })
     res.status(201).json(workoutExercise)
 })
+//Create setLog for exercise in workout
+router.post('/:id/exercises/:weId/sets', async (req, res) => {
+    const weId = parseInt(req.params.weId);
+    const {actualReps, actualTime, weight} = req.body;
+    if(!actualReps && !actualTime){
+        return res.status(400).json({ success: false, message: 'A set must include either reps or a time output' });
+    }
+    const workoutExercise = await prisma.workoutExercise.findUnique({where: {id: weId}})
+    if(!workoutExercise){
+        return res.status(404).json({ success: false, message: 'Record for Set Log placement does not exist' });
+    }
+    const setCount = await prisma.setLog.count({
+        where: { workoutExerciseId: parseInt(weId) }
+    });
+    const setNumber = setCount + 1;
+    const setLog = await prisma.setLog.create({
+        data: {workoutExerciseId: weId, setNumber: setNumber, actualReps, actualTime, weight}
+    })
+    res.status(201).json(setLog)
+})
 
 
 //Get ALL Workouts
@@ -77,6 +97,13 @@ router.get("/:id", validId, async (req, res) => {
         return res.status(404).json({ success: false, message: 'Workout does not exist' });
     }
     res.status(200).json(workout);
+})
+
+//Get ALL setLogs for workout
+router.get("/:id/exercises/:weId/sets", async (req, res) => {
+    const weId = parseInt(req.params.weId)
+    const sets = await prisma.setLog.findMany({where: {workoutExerciseId: weId}});
+    res.status(200).json(sets)
 })
 
 //Update Workout Details
