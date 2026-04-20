@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const prisma = require('../db');
+const validId = require('../middleware/validateId')
 
 //Create Program
 router.post('/', async (req, res) => {
@@ -15,7 +16,7 @@ router.post('/', async (req, res) => {
 })
 
 //Add Workout to Program
-router.post('/:id/workouts', async (req, res) => {
+router.post('/:id/workouts', validId, async (req, res) => {
     const programId = parseInt(req.params.id);
     const workoutId = parseInt(req.body.workoutId);
     const order = parseInt(req.body.order);
@@ -43,7 +44,7 @@ router.get("/", async (req, res) => {
 })
 
 //Get Specific Program
-router.get("/:id", async (req, res) => {
+router.get("/:id", validId, async (req, res) => {
     const id = parseInt(req.params.id);
     const program = await prisma.program.findUnique({where: {id: id}, include: {workouts: true}});
     if(!program){
@@ -53,9 +54,9 @@ router.get("/:id", async (req, res) => {
 })
 
 //Update Program Details
-router.patch("/:id", async (req, res) => {
+router.patch("/:id", validId, async (req, res) => {
     const id = parseInt(req.params.id);
-    const { title, default: isDefault } = req.body;
+    const { title, default: isDefault } = req.body || {};
     const existing = await prisma.program.findUnique({ where: { id } })
     if (!existing) {
         return res.status(404).json({ success: false, message: 'Program does not exist' })
@@ -65,18 +66,18 @@ router.patch("/:id", async (req, res) => {
 })
 
 //Delete Program
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", validId, async (req, res) => {
     const id = parseInt(req.params.id);
     const existing = await prisma.program.findUnique({ where: { id } })
     if (!existing) {
         return res.status(404).json({ success: false, message: 'Program does not exist' })
     }
     const program = await prisma.program.delete({ where: { id }})
-    res.json(program)
+    res.status(200).json(program)
 })
 
 //Set Program to default
-router.patch("/:id/default", async (req, res) => {
+router.patch("/:id/default", validId, async (req, res) => {
     const id = parseInt(req.params.id);
     const existing = await prisma.program.findUnique({ where: { id } })
     if (!existing) {

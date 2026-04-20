@@ -69,8 +69,8 @@ model ProgramWorkout {
   programId Int
   workoutId Int
   order     Int  
-  program   Program @relation(fields: [programId], references: [id])
-  workout   Workout @relation(fields: [workoutId], references: [id])
+  program   Program @relation(fields: [programId], references: [id], onDelete: Cascade)
+  workout   Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
 }
 
 model WorkoutExercise {
@@ -83,8 +83,8 @@ model WorkoutExercise {
   repTarget    Int?     // null if TIME
   timeTarget   Int?     // seconds, null if REPS
   circuitGroup Int?
-  workout      Workout  @relation(fields: [workoutId], references: [id])
-  exercise     Exercise @relation(fields: [exerciseId], references: [id])
+  workout      Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  exercise     Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   logs         SetLog[]
 }
 
@@ -96,12 +96,12 @@ model SetLog {
   actualTime        Int?            // seconds
   weight            Float?
   createdAt DateTime @default(now())
-  workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id])
+  workoutExercise   WorkoutExercise @relation(fields: [workoutExerciseId], references: [id], onDelete: Cascade)
 }
 
 model ExerciseBodyPart {
   id         Int      @id @default(autoincrement())
   exerciseId Int
   bodyPart   BodyPart
-  exercise   Exercise @relation(fields: [exerciseId], references: [id])
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 }
